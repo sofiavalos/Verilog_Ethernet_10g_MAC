@@ -114,6 +114,7 @@ module eth_mac_10g_tb;
     reg [15                     : 0] cfg_rx_pfc_opcode;
     reg                              cfg_rx_pfc_en;
 
+
     eth_mac_10g # (
         .DATA_WIDTH                     (DATA_WIDTH                     ),
         .KEEP_WIDTH                     (KEEP_WIDTH                     ),
@@ -132,7 +133,7 @@ module eth_mac_10g_tb;
         .PFC_ENABLE                     (PFC_ENABLE                     ),
         .PAUSE_ENABLE                   (PAUSE_ENABLE                   )
     )
-    eth_mac_10g_inst (
+    dut(
         .rx_clk                         (rx_clk                         ),
         .rx_rst                         (rx_rst                         ),
         .tx_clk                         (tx_clk                         ),
@@ -156,7 +157,7 @@ module eth_mac_10g_tb;
         .rx_ptp_ts                      (rx_ptp_ts                      ),
         .tx_axis_ptp_ts                 (tx_axis_ptp_ts                 ),
         .tx_axis_ptp_ts_tag             (tx_axis_ptp_ts_tag             ),
-        .tx_axis_ptp_ts_vali            (tx_axis_ptp_ts_valid           ),
+        .tx_axis_ptp_ts_valid           (tx_axis_ptp_ts_valid           ),
         .tx_lfc_req                     (tx_lfc_req                     ),
         .tx_lfc_resend                  (tx_lfc_resend                  ),
         .rx_lfc_en                      (rx_lfc_en                      ),
@@ -236,21 +237,107 @@ module eth_mac_10g_tb;
         tx_clk              = 1'b0;
         rx_rst              = 1'b1;
         tx_rst              = 1'b1;
+        // Axis
+        tx_axis_tdata       = 64'h0000000000000000;
+        tx_axis_tkeep       = 8'h00;
+        tx_axis_tvalid      = 1'b0;
+        tx_axis_tlast       = 1'b0;
+        tx_axis_tuser       = 16'h0000;
+        // Pause
+        tx_pause_req        = 1'b0;
+        tx_lfc_pause_en     = 1'b0;
+        // Configuracion
+        cfg_tx_lfc_en       = 1'b1;
+        cfg_tx_lfc_eth_dst  = 48'h000000000000;
+        cfg_tx_lfc_eth_src  = 48'h000000000000;
+        cfg_tx_lfc_eth_type = 16'h0000;
+        cfg_tx_lfc_opcode   = 16'h0000;
+        cfg_tx_lfc_quanta   = 16'h0000;
+        cfg_tx_lfc_refresh  = 16'h0000;
+        cfg_tx_pfc_en       = 1'b0;
+        cfg_tx_pfc_eth_dst  = 48'h000000000000;
+        cfg_tx_pfc_eth_src  = 48'h000000000000;
+        cfg_tx_pfc_eth_type = 16'h0000;
+        cfg_tx_pfc_opcode   = 16'h0000;
+        cfg_tx_pfc_quanta   = 16'h0000;
+        cfg_tx_pfc_refresh  = 16'h0000;
+        cfg_tx_enable       = 1'b0;
+        // LFC Y PFC TX
+        tx_lfc_resend       = 1'b0;
+        tx_lfc_req          = 1'b0;
+        tx_pfc_resend       = 1'b0;
+        tx_pfc_req          = 8'h00;
+        // Rx enable
+        cfg_rx_enable       = 1'b0;
+        // LFC Y PFC RX
+        rx_lfc_en           = 1'b0;
+        rx_lfc_ack          = 1'b0;
+        rx_pfc_en           = 8'h00;
+        rx_pfc_ack          = 8'h00;
         #100;
         rx_rst              = 1'b0;
-        #100;
         tx_rst              = 1'b0;
         #100;
-        //cfg_tx_enable     = 1'b1;
+        // Envia paquete
+        tx_axis_tdata       = 64'h5555555555555555;
+        tx_axis_tkeep       = 8'hFF;
+        tx_axis_tvalid      = 1'b1;
+        cfg_tx_enable       = 1'b1;
         cfg_rx_enable       = 1'b1;
-        cfg_mcf_rx_enable   = 1'b0;
-        //cfg_tx_lfc_en     = 1'b1;
-        //cfg_tx_pfc_en     = 1'b1;
-        cfg_rx_lfc_en       = 1'b0;
-        cfg_rx_pfc_en       = 1'b0;
-        xgmii_rxc           = 8'h00;
-        xgmii_rxd           = 64'h5555555555555555;
+        rx_lfc_en           = 1'b1;
+        rx_lfc_ack          = 1'b1;
+        rx_pfc_en           = 8'hFF;
+        rx_pfc_ack          = 8'hFF;
+        #1000;
+        // Lfc y Pfc
+        tx_lfc_req          = 1'b1;
+        tx_pfc_req          = 8'hFF;
+        cfg_tx_lfc_en       = 1'b1;
+        cfg_tx_lfc_eth_dst  = 48'hFFFFFFFFFFFF;
+        cfg_tx_lfc_eth_src  = 48'h333333333333;
+        cfg_tx_lfc_eth_type = 16'h8808;
+        cfg_tx_lfc_opcode   = 16'h8808;
+        cfg_tx_lfc_quanta   = 16'h0001;
+        cfg_tx_lfc_refresh  = 16'h0001;
+        cfg_tx_pfc_en       = 1'b1;
+        cfg_tx_pfc_eth_dst  = 48'h000000000000;
+        cfg_tx_pfc_eth_src  = 48'h999999999999;
+        cfg_tx_pfc_eth_type = 16'h8808;
+        cfg_tx_pfc_opcode   = 16'h8809;
+        cfg_tx_pfc_quanta   = 16'h0001;
+        cfg_tx_pfc_refresh  = 16'h0001;
+        // Pause 
+        tx_pause_req        = 1'b1;
+        tx_lfc_pause_en     = 1'b1;
+        #1000;
         $finish;
+    end
+
+
+    always @(*) begin
+        // Interfaz XGMII
+        xgmii_rxc <= xgmii_txc;
+        xgmii_rxd <= xgmii_txd;
+
+        // Configuracion
+        cfg_mcf_rx_eth_dst_mcast <= cfg_tx_lfc_eth_dst;
+        cfg_mcf_rx_check_eth_dst_mcast <= 1'b1;
+        cfg_mcf_rx_eth_dst_ucast <= cfg_tx_lfc_eth_dst;
+        cfg_mcf_rx_check_eth_dst_ucast <= 1'b1;
+        cfg_mcf_rx_eth_src <= cfg_tx_lfc_eth_src;
+        cfg_mcf_rx_check_eth_src <= 1'b1;
+        cfg_mcf_rx_eth_type <= cfg_tx_lfc_eth_type;
+        cfg_mcf_rx_opcode_lfc <= cfg_tx_lfc_opcode;
+        cfg_mcf_rx_check_opcode_lfc <= 1'b1;
+        cfg_mcf_rx_opcode_pfc <= cfg_tx_pfc_opcode;
+        cfg_mcf_rx_check_opcode_pfc <= 1'b1;
+        cfg_mcf_rx_forward <= 1'b1;
+        cfg_mcf_rx_enable <= cfg_rx_enable;
+        cfg_rx_lfc_en <= cfg_tx_lfc_en;
+        cfg_rx_lfc_opcode <= cfg_tx_lfc_opcode;
+        cfg_rx_pfc_en <= cfg_tx_pfc_en;
+        cfg_rx_pfc_opcode <= cfg_tx_pfc_opcode;
+
     end
 
 endmodule
