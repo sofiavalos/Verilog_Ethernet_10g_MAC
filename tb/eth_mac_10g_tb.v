@@ -2,22 +2,22 @@
 module eth_mac_10g_tb;
 
   // Parameters
-    parameter DATA_WIDTH                = 64                                                                                                        ,                                    
-    parameter KEEP_WIDTH                = (DATA_WIDTH/8)                                                                                            ,                        
-    parameter CTRL_WIDTH                = (DATA_WIDTH/8)                                                                                            ,                        
-    parameter ENABLE_PADDING            = 1                                                                                                         ,     
-    parameter ENABLE_DIC                = 1                                                                                                         ,                                    
-    parameter MIN_FRAME_LENGTH          = 64                                                                                                        ,                                                                         
-    parameter PTP_TS_ENABLE             = 0                                                                                                         ,
-    parameter PTP_TS_FMT_TOD            = 1                                                                                                         ,
-    parameter PTP_TS_WIDTH              = PTP_TS_FMT_TOD ? 96 : 64                                                                                  ,          
-    parameter TX_PTP_TS_CTRL_IN_TUSER   = 0                                                                                                         ,                    
-    parameter TX_PTP_TAG_ENABLE         = PTP_TS_ENABLE                                                                                             ,                                
-    parameter TX_PTP_TAG_WIDTH          = 16                                                                                                        ,                                   
-    parameter TX_USER_WIDTH             = (PTP_TS_ENABLE ? (TX_PTP_TAG_ENABLE ? TX_PTP_TAG_WIDTH : 0) + (TX_PTP_TS_CTRL_IN_TUSER ? 1 : 0) : 0) + 1  ,
-    parameter RX_USER_WIDTH             = (PTP_TS_ENABLE ? PTP_TS_WIDTH : 0) + 1                                                                    ,  
-    parameter PFC_ENABLE                = 0                                                                                                         ,                                                                           
-    parameter PAUSE_ENABLE              = PFC_ENABLE
+    parameter DATA_WIDTH                = 64                                                                                                        ;                                    
+    parameter KEEP_WIDTH                = (DATA_WIDTH/8)                                                                                            ;                        
+    parameter CTRL_WIDTH                = (DATA_WIDTH/8)                                                                                            ;                        
+    parameter ENABLE_PADDING            = 1                                                                                                         ;     
+    parameter ENABLE_DIC                = 1                                                                                                         ;                                    
+    parameter MIN_FRAME_LENGTH          = 64                                                                                                        ;                                                                         
+    parameter PTP_TS_ENABLE             = 0                                                                                                         ;
+    parameter PTP_TS_FMT_TOD            = 1                                                                                                         ;
+    parameter PTP_TS_WIDTH              = PTP_TS_FMT_TOD ? 96 : 64                                                                                  ;          
+    parameter TX_PTP_TS_CTRL_IN_TUSER   = 0                                                                                                         ;                    
+    parameter TX_PTP_TAG_ENABLE         = PTP_TS_ENABLE                                                                                             ;                                
+    parameter TX_PTP_TAG_WIDTH          = 16                                                                                                        ;                                   
+    parameter TX_USER_WIDTH             = (PTP_TS_ENABLE ? (TX_PTP_TAG_ENABLE ? TX_PTP_TAG_WIDTH : 0) + (TX_PTP_TS_CTRL_IN_TUSER ? 1 : 0) : 0) + 1  ;
+    parameter RX_USER_WIDTH             = (PTP_TS_ENABLE ? PTP_TS_WIDTH : 0) + 1                                                                    ;  
+    parameter PFC_ENABLE                = 0                                                                                                         ;                                                                           
+    parameter PAUSE_ENABLE              = PFC_ENABLE                                                                                                ;
 
     //Ports
     reg                              rx_clk;
@@ -228,7 +228,8 @@ module eth_mac_10g_tb;
         .cfg_rx_pfc_en                  (cfg_rx_pfc_en                  )
     );
 
-    always #5  clk =~ clk ;
+    always #5  rx_clk =~ rx_clk ;
+    always #5  tx_clk =~ tx_clk ;
 
     initial begin
         rx_clk              = 1'b0;

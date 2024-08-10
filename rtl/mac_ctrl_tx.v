@@ -33,81 +33,80 @@ THE SOFTWARE.
  */
 module mac_ctrl_tx #
 (
-    parameter DATA_WIDTH = 8,                   //! Ancho de los datos en bits
-    parameter KEEP_ENABLE = DATA_WIDTH>8,       //! Habilita el uso de 'keep' si el ancho de datos es mayor que 8
-    parameter KEEP_WIDTH = DATA_WIDTH/8,        //! Ancho de 'keep', calculado como el ancho de datos dividido por 8
-    parameter ID_ENABLE = 0,                    //! Habilita el campo de identificación
-    parameter ID_WIDTH = 8,                     //! Ancho del campo de identificación
-    parameter DEST_ENABLE = 0,                  //! Habilita el campo de destino
-    parameter DEST_WIDTH = 8,                   //! Ancho del campo de destino
-    parameter USER_ENABLE = 1,                  //! Habilita el campo de usuario
-    parameter USER_WIDTH = 1,                   //! Ancho del campo de usuario
-    parameter MCF_PARAMS_SIZE = 18              //! Tamaño en bytes de los parámetros del marco de control MAC
+    parameter DATA_WIDTH = 8,
+    parameter KEEP_ENABLE = DATA_WIDTH>8,
+    parameter KEEP_WIDTH = DATA_WIDTH/8,
+    parameter ID_ENABLE = 0,
+    parameter ID_WIDTH = 8,
+    parameter DEST_ENABLE = 0,
+    parameter DEST_WIDTH = 8,
+    parameter USER_ENABLE = 1,
+    parameter USER_WIDTH = 1,
+    parameter MCF_PARAMS_SIZE = 18
 )
 (
-    input  wire                          clk,   //! Señal de reloj
-    input  wire                          rst,   //! Señal de reset
+    input  wire                          clk,
+    input  wire                          rst,
 
     /*
-     * Entradas AXI stream
+     * AXI stream input
      */
-    input  wire [DATA_WIDTH-1:0]         s_axis_tdata,  //! Datos de entrada
-    input  wire [KEEP_WIDTH-1:0]         s_axis_tkeep,  //! Señal 'keep' de entrada
-    input  wire                          s_axis_tvalid, //! Señal de validez de datos de entrada
-    output wire                          s_axis_tready, //! Señal de preparado de datos de entrada
-    input  wire                          s_axis_tlast,  //! Indicador de último dato de entrada
-    input  wire [ID_WIDTH-1:0]           s_axis_tid,    //! Identificador de transacción de entrada
-    input  wire [DEST_WIDTH-1:0]         s_axis_tdest,  //! Destino de transacción de entrada
-    input  wire [USER_WIDTH-1:0]         s_axis_tuser,  //! Usuario de transacción de entrada
+    input  wire [DATA_WIDTH-1:0]         s_axis_tdata,
+    input  wire [KEEP_WIDTH-1:0]         s_axis_tkeep,
+    input  wire                          s_axis_tvalid,
+    output wire                          s_axis_tready,
+    input  wire                          s_axis_tlast,
+    input  wire [ID_WIDTH-1:0]           s_axis_tid,
+    input  wire [DEST_WIDTH-1:0]         s_axis_tdest,
+    input  wire [USER_WIDTH-1:0]         s_axis_tuser,
 
     /*
-     * Salidas AXI stream
+     * AXI stream output
      */
-    output wire [DATA_WIDTH-1:0]         m_axis_tdata,  //! Datos de salida
-    output wire [KEEP_WIDTH-1:0]         m_axis_tkeep,  //! Señal 'keep' de salida
-    output wire                          m_axis_tvalid, //! Señal de validez de datos de salida
-    input  wire                          m_axis_tready, //! Señal de preparado de datos de salida
-    output wire                          m_axis_tlast,  //! Indicador de último dato de salida
-    output wire [ID_WIDTH-1:0]           m_axis_tid,    //! Identificador de transacción de salida
-    output wire [DEST_WIDTH-1:0]         m_axis_tdest,  //! Destino de transacción de salida
-    output wire [USER_WIDTH-1:0]         m_axis_tuser,  //! Usuario de transacción de salida
+    output wire [DATA_WIDTH-1:0]         m_axis_tdata,
+    output wire [KEEP_WIDTH-1:0]         m_axis_tkeep,
+    output wire                          m_axis_tvalid,
+    input  wire                          m_axis_tready,
+    output wire                          m_axis_tlast,
+    output wire [ID_WIDTH-1:0]           m_axis_tid,
+    output wire [DEST_WIDTH-1:0]         m_axis_tdest,
+    output wire [USER_WIDTH-1:0]         m_axis_tuser,
 
     /*
-     * Interfaz de marco de control MAC
+     * MAC control frame interface
      */
-    input  wire                          mcf_valid,           //! Validez del marco de control MAC
-    output wire                          mcf_ready,           //! Listo para recibir marco de control MAC
-    input  wire [47:0]                   mcf_eth_dst,         //! Dirección de destino Ethernet del marco de control MAC
-    input  wire [47:0]                   mcf_eth_src,         //! Dirección de origen Ethernet del marco de control MAC
-    input  wire [15:0]                   mcf_eth_type,        //! Tipo Ethernet del marco de control MAC
-    input  wire [15:0]                   mcf_opcode,          //! Código de operación del marco de control MAC
-    input  wire [MCF_PARAMS_SIZE*8-1:0]  mcf_params,          //! Parámetros del marco de control MAC
-    input  wire [ID_WIDTH-1:0]           mcf_id,              //! Identificador del marco de control MAC
-    input  wire [DEST_WIDTH-1:0]         mcf_dest,            //! Destino del marco de control MAC
-    input  wire [USER_WIDTH-1:0]         mcf_user,            //! Usuario del marco de control MAC
+    input  wire                          mcf_valid,
+    output wire                          mcf_ready,
+    input  wire [47:0]                   mcf_eth_dst,
+    input  wire [47:0]                   mcf_eth_src,
+    input  wire [15:0]                   mcf_eth_type,
+    input  wire [15:0]                   mcf_opcode,
+    input  wire [MCF_PARAMS_SIZE*8-1:0]  mcf_params,
+    input  wire [ID_WIDTH-1:0]           mcf_id,
+    input  wire [DEST_WIDTH-1:0]         mcf_dest,
+    input  wire [USER_WIDTH-1:0]         mcf_user,
 
     /*
-     * Interfaz de pausa
+     * Pause interface
      */
-    input  wire                          tx_pause_req,        //! Solicitud de pausa de transmisión
-    output wire                          tx_pause_ack,        //! Confirmación de pausa de transmisión
+    input  wire                          tx_pause_req,
+    output wire                          tx_pause_ack,
 
     /*
-     * Estado
+     * Status
      */
-    output wire                          stat_tx_mcf            //! Estado de transmisión del marco de control MAC
+    output wire                          stat_tx_mcf
 );
 
-parameter BYTE_LANES = KEEP_ENABLE ? KEEP_WIDTH : 1;            //! Número de carriles de bytes activos
+parameter BYTE_LANES = KEEP_ENABLE ? KEEP_WIDTH : 1;
 
-parameter HDR_SIZE = 60;                                        //! Tamaño del encabezado en bytes
+parameter HDR_SIZE = 60;
 
-parameter CYCLE_COUNT = (HDR_SIZE+BYTE_LANES-1)/BYTE_LANES;     //! Número de ciclos necesarios para transmitir el encabezado
+parameter CYCLE_COUNT = (HDR_SIZE+BYTE_LANES-1)/BYTE_LANES;
 
-parameter PTR_WIDTH = $clog2(CYCLE_COUNT);                      //! Ancho del puntero necesario para contar los ciclos de transmisión
+parameter PTR_WIDTH = $clog2(CYCLE_COUNT);
 
-parameter OFFSET = HDR_SIZE % BYTE_LANES;                       //! Desplazamiento necesario para alinear el encabezado con los límites de byte
-
+parameter OFFSET = HDR_SIZE % BYTE_LANES;
 
 // check configuration
 initial begin
@@ -139,26 +138,25 @@ data traffic.
 
 */
 
-reg send_data_reg = 1'b0, send_data_next;          //! Registro para la señal de envío de datos
-reg send_mcf_reg = 1'b0, send_mcf_next;            //! Registro para la señal de envío de marco de control MAC
-reg [PTR_WIDTH-1:0] ptr_reg = 0, ptr_next;         //! Registro para el puntero de control
+reg send_data_reg = 1'b0, send_data_next;
+reg send_mcf_reg = 1'b0, send_mcf_next;
+reg [PTR_WIDTH-1:0] ptr_reg = 0, ptr_next;
 
-reg s_axis_tready_reg = 1'b0, s_axis_tready_next;  //! Registro para la señal de listo de datos de entrada AXI stream
-reg mcf_ready_reg = 1'b0, mcf_ready_next;          //! Registro para la señal de listo de marco de control MAC
-reg tx_pause_ack_reg = 1'b0, tx_pause_ack_next;    //! Registro para la confirmación de pausa de transmisión
-reg stat_tx_mcf_reg = 1'b0, stat_tx_mcf_next;      //! Registro para el estado de transmisión del marco de control MAC
+reg s_axis_tready_reg = 1'b0, s_axis_tready_next;
+reg mcf_ready_reg = 1'b0, mcf_ready_next;
+reg tx_pause_ack_reg = 1'b0, tx_pause_ack_next;
+reg stat_tx_mcf_reg = 1'b0, stat_tx_mcf_next;
 
 // internal datapath
-reg  [DATA_WIDTH-1:0] m_axis_tdata_int;             //! Datos de salida internos del camino de datos
-reg  [KEEP_WIDTH-1:0] m_axis_tkeep_int;             //! Señal 'keep' de salida interna del camino de datos
-reg                   m_axis_tvalid_int;            //! Señal de validez de datos de salida interna
-reg                   m_axis_tready_int_reg = 1'b0; //! Registro para la señal de preparado de datos de salida interna
-reg                   m_axis_tlast_int;             //! Indicador de último dato de salida interno
-reg  [ID_WIDTH-1:0]   m_axis_tid_int;               //! Identificador de transacción de salida interno
-reg  [DEST_WIDTH-1:0] m_axis_tdest_int;             //! Destino de transacción de salida interno
-reg  [USER_WIDTH-1:0] m_axis_tuser_int;             //! Usuario de transacción de salida interno
-wire                  m_axis_tready_int_early;      //! Señal anticipada de preparado de datos de salida interna
-
+reg  [DATA_WIDTH-1:0] m_axis_tdata_int;
+reg  [KEEP_WIDTH-1:0] m_axis_tkeep_int;
+reg                   m_axis_tvalid_int;
+reg                   m_axis_tready_int_reg = 1'b0;
+reg                   m_axis_tlast_int;
+reg  [ID_WIDTH-1:0]   m_axis_tid_int;
+reg  [DEST_WIDTH-1:0] m_axis_tdest_int;
+reg  [USER_WIDTH-1:0] m_axis_tuser_int;
+wire                  m_axis_tready_int_early;
 
 assign s_axis_tready = s_axis_tready_reg;
 assign mcf_ready = mcf_ready_reg;
@@ -167,7 +165,6 @@ assign stat_tx_mcf = stat_tx_mcf_reg;
 
 integer k;
 
-//! Implementa la lógica para configurar un encabezado MAC
 always @* begin
     send_data_next = send_data_reg;
     send_mcf_next = send_mcf_reg;
@@ -187,75 +184,76 @@ always @* begin
     m_axis_tuser_int = 0;
 
     if (!send_data_reg && !send_mcf_reg) begin
-        m_axis_tdata_int = s_axis_tdata;  // copia los datos de entrada
-        m_axis_tkeep_int = s_axis_tkeep;  // copia la señal de keep
-        m_axis_tvalid_int = 1'b0;         // invalida la señal de salida
-        m_axis_tlast_int = s_axis_tlast;  // copia la señal de last
-        m_axis_tid_int = s_axis_tid;      // copia la señal de ID
-        m_axis_tdest_int = s_axis_tdest;  // copia la señal de destino
-        m_axis_tuser_int = s_axis_tuser;  // copia la señal de usuario
-        s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;  // determina si está lista para recibir
-        tx_pause_ack_next = tx_pause_req;  // ack para pausa
+        m_axis_tdata_int = s_axis_tdata;
+        m_axis_tkeep_int = s_axis_tkeep;
+        m_axis_tvalid_int = 1'b0;
+        m_axis_tlast_int = s_axis_tlast;
+        m_axis_tid_int = s_axis_tid;
+        m_axis_tdest_int = s_axis_tdest;
+        m_axis_tuser_int = s_axis_tuser;
+        s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;
+        tx_pause_ack_next = tx_pause_req;
         if (s_axis_tvalid && s_axis_tready) begin
-            s_axis_tready_next = m_axis_tready_int_early;  // confirma que está lista para enviar
+            s_axis_tready_next = m_axis_tready_int_early;
             tx_pause_ack_next = 1'b0;
-            m_axis_tvalid_int = 1'b1;  // indica que hay datos válidos para enviar
-            if (s_axis_tlast) begin  // si es el último dato
-                s_axis_tready_next = m_axis_tready_int_early && !mcf_valid && !mcf_ready;  // espera antes de enviar nuevos datos
+            m_axis_tvalid_int = 1'b1;
+            if (s_axis_tlast) begin
+                s_axis_tready_next = m_axis_tready_int_early && !mcf_valid && !mcf_ready;
                 send_data_next = 1'b0;
             end else begin
-                send_data_next = 1'b1;  // envía nuevos datos
+                send_data_next = 1'b1;
             end
-        end else if (mcf_valid) begin  // si hay un paquete de control de flujo válido
-            s_axis_tready_next = 1'b0;  // espera para enviar
+        end else if (mcf_valid) begin
+            s_axis_tready_next = 1'b0;
             ptr_next = 0;
-            send_mcf_next = 1'b1;  // indica que hay datos de control de flujo para enviar
-            mcf_ready_next = (CYCLE_COUNT == 1) && m_axis_tready_int_early;  // espera la confirmación de envío
+            send_mcf_next = 1'b1;
+            mcf_ready_next = (CYCLE_COUNT == 1) && m_axis_tready_int_early;
         end
     end
-    
+
     if (send_data_reg) begin
-        m_axis_tdata_int = s_axis_tdata;  // copia los datos de entrada
-        m_axis_tkeep_int = s_axis_tkeep;  // copia la señal de keep
-        m_axis_tvalid_int = 1'b0;         // invalida la señal de salida
-        m_axis_tlast_int = s_axis_tlast;  // copia la señal de last
-        m_axis_tid_int = s_axis_tid;      // copia la señal de ID
-        m_axis_tdest_int = s_axis_tdest;  // copia la señal de destino
-        m_axis_tuser_int = s_axis_tuser;  // copia la señal de usuario
-        s_axis_tready_next = m_axis_tready_int_early;  // determina si está lista para recibir
+        m_axis_tdata_int = s_axis_tdata;
+        m_axis_tkeep_int = s_axis_tkeep;
+        m_axis_tvalid_int = 1'b0;
+        m_axis_tlast_int = s_axis_tlast;
+        m_axis_tid_int = s_axis_tid;
+        m_axis_tdest_int = s_axis_tdest;
+        m_axis_tuser_int = s_axis_tuser;
+        s_axis_tready_next = m_axis_tready_int_early;
         if (s_axis_tvalid && s_axis_tready) begin
-            m_axis_tvalid_int = 1'b1;  // indica que hay datos válidos para enviar
-            if (s_axis_tlast) begin  // si es el último dato
-                s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;  // espera antes de enviar nuevos datos
+            m_axis_tvalid_int = 1'b1;
+            if (s_axis_tlast) begin
+                s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;
                 send_data_next = 1'b0;
-                if (mcf_valid) begin  // si hay un paquete de control de flujo válido
-                    s_axis_tready_next = 1'b0;  // espera para enviar
+                if (mcf_valid) begin
+                    s_axis_tready_next = 1'b0;
                     ptr_next = 0;
-                    send_mcf_next = 1'b1;  // indica que hay datos de control de flujo para enviar
-                    mcf_ready_next = (CYCLE_COUNT == 1) && m_axis_tready_int_early;  // espera la confirmación de envío
+                    send_mcf_next = 1'b1;
+                    mcf_ready_next = (CYCLE_COUNT == 1) && m_axis_tready_int_early;
                 end
             end else begin
-                send_data_next = 1'b1;  // envía nuevos datos
+                send_data_next = 1'b1;
             end
         end
     end
-    
+
     if (send_mcf_reg) begin
-        mcf_ready_next = (CYCLE_COUNT == 1 || ptr_reg == CYCLE_COUNT-1) && m_axis_tready_int_early;  // determina si está lista para recibir datos de control de flujo
+        mcf_ready_next = (CYCLE_COUNT == 1 || ptr_reg == CYCLE_COUNT-1) && m_axis_tready_int_early;
         if (m_axis_tready_int_reg) begin
-            ptr_next = ptr_reg + 1;  // incrementa el puntero para el próximo dato de control de flujo
-            m_axis_tvalid_int = 1'b1;  // indica que hay datos válidos para enviar
-            m_axis_tid_int = mcf_id;   // copia la señal de ID de control de flujo
-            m_axis_tdest_int = mcf_dest;  // copia la señal de destino de control de flujo
-            m_axis_tuser_int = mcf_user;  // copia la señal de usuario de control de flujo
-    
+            ptr_next = ptr_reg + 1;
+
+            m_axis_tvalid_int = 1'b1;
+            m_axis_tid_int = mcf_id;
+            m_axis_tdest_int = mcf_dest;
+            m_axis_tuser_int = mcf_user;
+
             `define _HEADER_FIELD_(offset, field) \
                 if (ptr_reg == offset/BYTE_LANES) begin \
                     m_axis_tdata_int[(offset%BYTE_LANES)*8 +: 8] = field; \
                     m_axis_tkeep_int[offset%BYTE_LANES] = 1'b1; \
                 end
-    
-            `_HEADER_FIELD_(0,  mcf_eth_dst[5*8 +: 8])  // define campos de encabezado para el paquete de control de flujo
+
+            `_HEADER_FIELD_(0,  mcf_eth_dst[5*8 +: 8])
             `_HEADER_FIELD_(1,  mcf_eth_dst[4*8 +: 8])
             `_HEADER_FIELD_(2,  mcf_eth_dst[3*8 +: 8])
             `_HEADER_FIELD_(3,  mcf_eth_dst[2*8 +: 8])
@@ -273,37 +271,31 @@ always @* begin
             `_HEADER_FIELD_(15, mcf_opcode[0*8 +: 8])
 
             for (k = 0; k < HDR_SIZE-16; k = k + 1) begin
-            // verifica si el puntero actual apunta al byte correspondiente en el arreglo de datos
                 if (ptr_reg == (16+k)/BYTE_LANES) begin
-                    // copia los parámetros del paquete de control de flujo a la interfaz axis de salida interna
                     if (k < MCF_PARAMS_SIZE) begin
                         m_axis_tdata_int[((16+k)%BYTE_LANES)*8 +: 8] = mcf_params[k*8 +: 8];
                     end else begin
-                        m_axis_tdata_int[((16+k)%BYTE_LANES)*8 +: 8] = 0;  // rellena con ceros si no hay más parámetros
+                        m_axis_tdata_int[((16+k)%BYTE_LANES)*8 +: 8] = 0;
                     end
-                    m_axis_tkeep_int[(16+k)%BYTE_LANES] = 1'b1;  // marca los bits válidos en la señal de keep
+                    m_axis_tkeep_int[(16+k)%BYTE_LANES] = 1'b1;
                 end
             end
 
-            // verifica si el último byte del encabezado se ha procesado completamente
             if (ptr_reg == (HDR_SIZE-1)/BYTE_LANES) begin
-                // prepara las señales para enviar el paquete de control de flujo completo
-                s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;  // espera antes de enviar nuevos datos si es el último
-                mcf_ready_next = 1'b0;  // indica que no hay más datos de control de flujo para enviar
-                m_axis_tlast_int = 1'b1;  // marca el último dato del paquete de control de flujo
-                send_mcf_next = 1'b0;  // indica que no hay más datos de control de flujo para enviar
-                stat_tx_mcf_next = 1'b1;  // marca el estado de transmisión del paquete de control de flujo
+                s_axis_tready_next = m_axis_tready_int_early && !tx_pause_req;
+                mcf_ready_next = 1'b0;
+                m_axis_tlast_int = 1'b1;
+                send_mcf_next = 1'b0;
+                stat_tx_mcf_next = 1'b1;
             end else begin
-                // determina si la interfaz axis de salida está lista para recibir más datos de control de flujo
                 mcf_ready_next = (ptr_next == CYCLE_COUNT-1) && m_axis_tready_int_early;
             end
-        
+
             `undef _HEADER_FIELD_
         end
     end
 end
 
-//! Actualiza los registros en el flanco positivo del clock
 always @(posedge clk) begin
     send_data_reg <= send_data_next;
     send_mcf_reg <= send_mcf_next;
@@ -326,27 +318,26 @@ always @(posedge clk) begin
 end
 
 // output datapath logic
-reg [DATA_WIDTH-1:0] m_axis_tdata_reg  = {DATA_WIDTH{1'b0}};    //! Registro para datos de salida 
-reg [KEEP_WIDTH-1:0] m_axis_tkeep_reg  = {KEEP_WIDTH{1'b0}};    //! Registro para señal de keep de salida
-reg                  m_axis_tvalid_reg = 1'b0;                  //! Registro para señal de validez de salida
-reg                  m_axis_tlast_reg  = 1'b0;                  //! Registro para señal de último de salida
-reg [ID_WIDTH-1:0]   m_axis_tid_reg    = {ID_WIDTH{1'b0}};      //! Registro para ID de salida
-reg [DEST_WIDTH-1:0] m_axis_tdest_reg  = {DEST_WIDTH{1'b0}};    //! Registro para destino de salida
-reg [USER_WIDTH-1:0] m_axis_tuser_reg  = {USER_WIDTH{1'b0}};    //! Registro para usuario de salida
+reg [DATA_WIDTH-1:0] m_axis_tdata_reg  = {DATA_WIDTH{1'b0}};
+reg [KEEP_WIDTH-1:0] m_axis_tkeep_reg  = {KEEP_WIDTH{1'b0}};
+reg                  m_axis_tvalid_reg = 1'b0, m_axis_tvalid_next;
+reg                  m_axis_tlast_reg  = 1'b0;
+reg [ID_WIDTH-1:0]   m_axis_tid_reg    = {ID_WIDTH{1'b0}};
+reg [DEST_WIDTH-1:0] m_axis_tdest_reg  = {DEST_WIDTH{1'b0}};
+reg [USER_WIDTH-1:0] m_axis_tuser_reg  = {USER_WIDTH{1'b0}};
 
-reg [DATA_WIDTH-1:0] temp_m_axis_tdata_reg  = {DATA_WIDTH{1'b0}};   //! Registro temporal para datos
-reg [KEEP_WIDTH-1:0] temp_m_axis_tkeep_reg  = {KEEP_WIDTH{1'b0}};   //! Registro temporal para keep 
-reg                  temp_m_axis_tvalid_reg = 1'b0;                 //! Registro temporal para la validez de datos
-reg                  temp_m_axis_tlast_reg  = 1'b0;                 //! Registro temporal para último dato
-reg [ID_WIDTH-1:0]   temp_m_axis_tid_reg    = {ID_WIDTH{1'b0}};     //! Registro temporal para el ID 
-reg [DEST_WIDTH-1:0] temp_m_axis_tdest_reg  = {DEST_WIDTH{1'b0}};   //! Registro temporal para el destino
-reg [USER_WIDTH-1:0] temp_m_axis_tuser_reg  = {USER_WIDTH{1'b0}};   //! Registro temporal para el usuario 
+reg [DATA_WIDTH-1:0] temp_m_axis_tdata_reg  = {DATA_WIDTH{1'b0}};
+reg [KEEP_WIDTH-1:0] temp_m_axis_tkeep_reg  = {KEEP_WIDTH{1'b0}};
+reg                  temp_m_axis_tvalid_reg = 1'b0, temp_m_axis_tvalid_next;
+reg                  temp_m_axis_tlast_reg  = 1'b0;
+reg [ID_WIDTH-1:0]   temp_m_axis_tid_reg    = {ID_WIDTH{1'b0}};
+reg [DEST_WIDTH-1:0] temp_m_axis_tdest_reg  = {DEST_WIDTH{1'b0}};
+reg [USER_WIDTH-1:0] temp_m_axis_tuser_reg  = {USER_WIDTH{1'b0}};
 
 // datapath control
-reg store_axis_int_to_output;   //! Control para almacenar datos internos en la salida
-reg store_axis_int_to_temp;     //! Control para almacenar datos internos en temporales
-reg store_axis_temp_to_output;  //! Control para almacenar datos temporales en la salida
-
+reg store_axis_int_to_output;
+reg store_axis_int_to_temp;
+reg store_axis_temp_to_output;
 
 assign m_axis_tdata  = m_axis_tdata_reg;
 assign m_axis_tkeep  = KEEP_ENABLE ? m_axis_tkeep_reg : {KEEP_WIDTH{1'b1}};
@@ -359,7 +350,6 @@ assign m_axis_tuser  = USER_ENABLE ? m_axis_tuser_reg : {USER_WIDTH{1'b0}};
 // enable ready input next cycle if output is ready or the temp reg will not be filled on the next cycle (output reg empty or no input)
 assign m_axis_tready_int_early = m_axis_tready || (!temp_m_axis_tvalid_reg && (!m_axis_tvalid_reg || !m_axis_tvalid_int));
 
-//! Gestiona la transferencia del estado listo del destino hacia la fuente de datos
 always @* begin
     // transfer sink ready state to source
     m_axis_tvalid_next = m_axis_tvalid_reg;
@@ -388,7 +378,6 @@ always @* begin
     end
 end
 
-//! Maneja la lógica de transferencia de datos entre diferentes etapas, asegurando que los datos sean correctamente almacenados y transferidos conforme a las condiciones de listo y a las señales de control disponibles
 always @(posedge clk) begin
     m_axis_tvalid_reg <= m_axis_tvalid_next;
     m_axis_tready_int_reg <= m_axis_tready_int_early;
