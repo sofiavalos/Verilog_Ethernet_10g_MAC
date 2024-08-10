@@ -8,5 +8,5 @@
 La base del repositorio son los módulos proporcionados por [Alex Forenchich](https://github.com/alexforencich/verilog-ethernet) en su propio repositorio.
 
 ## Documentación
-Para obtener más información detallada sobre los bloques MAC, consulta la [documentación detallada en](https://ethernet10g.netlify.app/10-gbase/mac).
+Para obtener más información detallada sobre los bloques MAC, consulta la [documentación detallada](https://ethernet10g.netlify.app/10-gbase/mac).
 
