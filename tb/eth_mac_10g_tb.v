@@ -1,4 +1,3 @@
-
 module eth_mac_10g_tb;
 
   // Parameters
@@ -151,10 +150,10 @@ module eth_mac_10g_tb;
         tx_pfc_resend       = 1'b0                                                                                                                  ;                     
         tx_pfc_req          = 8'h00                                                                                                                 ;        
         #100                                                                                                                                        ;
-        @(posegde rx_clk)                                                                                                                           ;  
+        @(posedge tx_clk)                                                                                                                           ;  
         tx_rst              = 1'b0                                                                                                                  ;
         #100                                                                                                                                        ;                           
-        @(posedge rx_clk)                                                                                                                           ;                              
+        @(posedge tx_clk)                                                                                                                           ;                              
         // Envia paquete
         //tx_axis_tdata       = 64'hAAAAAAAAAAAAAAAA;
         tx_axis_tkeep       = 8'hFF                                                                                                                 ;
@@ -204,7 +203,7 @@ module eth_mac_10g_tb;
         rx_pfc_en           = 8'h00                                                                                                                 ;
         rx_pfc_ack          = 8'h00                                                                                                                 ;
         #100                                                                                                                                        ;            
-        @(posegde rx_clk)                                                                                                                           ;      
+        @(posedge rx_clk)                                                                                                                           ;      
         rx_rst              = 1'b0                                                                                                                  ;
         #100                                                                                                                                        ;
         @(posedge rx_clk)                                                                                                                           ;      
