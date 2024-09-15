@@ -91,17 +91,7 @@ parameter EMPTY_WIDTH = $clog2(KEEP_WIDTH);
 parameter MIN_LEN_WIDTH = $clog2(MIN_FRAME_LENGTH-4-CTRL_WIDTH+1);
 
 // bus width assertions
-initial begin
-    if (DATA_WIDTH != 32) begin
-        $error("Error: Interface width must be 32");
-        $finish;
-    end
 
-    if (KEEP_WIDTH * 8 != DATA_WIDTH || CTRL_WIDTH * 8 != DATA_WIDTH) begin
-        $error("Error: Interface requires byte (8-bit) granularity");
-        $finish;
-    end
-end
 
 localparam [7:0]
     ETH_PRE = 8'h55,

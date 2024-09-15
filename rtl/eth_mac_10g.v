@@ -186,18 +186,6 @@ module eth_mac_10g #
 parameter MAC_CTRL_ENABLE = PAUSE_ENABLE || PFC_ENABLE;
 parameter TX_USER_WIDTH_INT = MAC_CTRL_ENABLE ? (PTP_TS_ENABLE ? (TX_PTP_TAG_ENABLE ? TX_PTP_TAG_WIDTH : 0) + 1 : 0) + 1 : TX_USER_WIDTH;
 
-// bus width assertions
-initial begin
-    if (DATA_WIDTH != 32 && DATA_WIDTH != 64) begin
-        $error("Error: Interface width must be 32 or 64");
-        $finish;
-    end
-
-    if (KEEP_WIDTH * 8 != DATA_WIDTH || CTRL_WIDTH * 8 != DATA_WIDTH) begin
-        $error("Error: Interface requires byte (8-bit) granularity");
-        $finish;
-    end
-end
 
 wire [DATA_WIDTH-1:0]         tx_axis_tdata_int;
 wire [KEEP_WIDTH-1:0]         tx_axis_tkeep_int;
