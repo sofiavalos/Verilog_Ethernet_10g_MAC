@@ -120,11 +120,11 @@ module eth_mac_10g_tb;
         tx_clk              = 1'b0                                                                                                                  ;
         tx_rst              = 1'b1                                                                                                                  ;
         // Axis
-        //tx_axis_tdata       = 64'h0000000000000000;
-        tx_axis_tkeep       = 8'h00                                                                                                                 ;
+        tx_axis_tdata       = 64'h2F2E2D2C2B2A2928                                                                                                  ;
+        tx_axis_tkeep       = 8'hFF                                                                                                                 ;
         tx_axis_tlast       = 1'b0                                                                                                                  ;                                     
-        tx_axis_tvalid      = 1'b0                                                                                                                  ;                                     
-        tx_axis_tuser       = 16'hffff                                                                                                              ;                                 
+        tx_axis_tvalid      = 1'b1                                                                                                                  ;                                     
+        tx_axis_tuser       = 16'h0000                                                                                                            ;
         // Pause
         tx_pause_req        = 1'b0                                                                                                                  ;
         tx_lfc_pause_en     = 1'b0                                                                                                                  ;
