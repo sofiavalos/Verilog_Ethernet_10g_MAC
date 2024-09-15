@@ -120,11 +120,19 @@ module eth_mac_10g_rx_tb;
         cfg_rx_pfc_en                   = 1'b0                                                                                                          ;
         @(posedge rx_clk)                                                                                                                               ;
         rx_rst = 1'b0                                                                                                                                   ;
-        xgmii_rxd = {DATA_WIDTH{1'b0}}                                                                                                                  ;
+        xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                        ;
         xgmii_rxc = {CTRL_WIDTH{1'b0}}                                                                                                                  ;
         cfg_rx_enable = 1'b1                                                                                                                            ;
-        #100                                                                                                                                            ;
+        #10                                                                                                                                           ;
         @(posedge rx_clk)                                                                                                                               ;  
+        rx_payload_packet(8);
+        xgmii_rxc = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM};
+        #10;
+        @(posedge rx_clk);
+        rx_iddle_packet();
+        #100;
+        @(posedge rx_clk);
+        
         $finish                                                                                                                                         ;    
     end
 
