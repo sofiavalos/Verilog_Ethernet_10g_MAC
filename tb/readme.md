@@ -18,7 +18,7 @@ Los objetivos generales son
 - Se enviaron paquetes equivalentes a 46 bytes de datos con todos 0s.
 - Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
 
-## Resultados Test 1
+### Resultados Test 1
 
 - En la interfaz AXI se recibieron los 46 bytes.
 - Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
@@ -30,7 +30,7 @@ Los objetivos generales son
 - Se enviaron paquetes equivalentes a 1500 bytes de datos con todos 0s.
 - Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
 
-## Resultados Test 2
+### Resultados Test 2
 
 - En la interfaz AXI se recibieron los 1500 bytes, sin errores.
 - Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
@@ -42,7 +42,7 @@ Los objetivos generales son
 - Se enviaron paquetes equivalentes a 45 bytes de datos igual a 10 y un byte de padding, es decir 0.
 - Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
 
-## Resultados Test 3
+### Resultados Test 3
 
 - En la interfaz AXI se recibieron los 45 bytes más el bit de padding. No hubo errores
 - Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
@@ -54,7 +54,7 @@ Los objetivos generales son
 - Se enviaron paquetes equivalentes a 1501 bytes de datos con todos 0s.
 - Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
 
-## Resultados Test 4
+### Resultados Test 4
 
 - En la interfaz AXI se recibieron los 1501 bytes, incluso cuando esto significa que supera la máxima longitud defida por la norma.
 - Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
