@@ -93,6 +93,28 @@ module eth_mac_10g_rx_tb;
             #10                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {DATA_WIDTH {1'b0}}                                                                                                             ;
+            #230                                                                                                                                        ;
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
+            #10                                                                                                                                         ;
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
+            #80                                                                                                                                         ;
+            @(posedge rx_clk)                                                                                                                           ;
+            $finish                                                                                                                                     ;       
+        end
+    `elsif TEST3
+        initial begin
+            #100                                                                                                                                        ;               
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;
+            @(posedge rx_clk)                                                                                                                           ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
             xgmii_rxd = {DATA_WIDTH / 2 {2'b01}}                                                                                                        ;
             #70                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;
@@ -107,28 +129,6 @@ module eth_mac_10g_rx_tb;
             #80                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;
             $finish                                                                                                                                     ;
-        end
-    `elsif TEST3
-        initial begin
-            #100                                                                                                                                        ;               
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
-            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
-            cfg_rx_enable = 1'b1                                                                                                                        ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;  
-            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH {1'b0}}                                                                                                             ;
-            #230                                                                                                                                        ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
-            #80                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            $finish                                                                                                                                     ;       
         end
     `elsif TEST4
         initial begin
