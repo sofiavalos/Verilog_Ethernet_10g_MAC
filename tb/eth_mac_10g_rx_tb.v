@@ -59,7 +59,7 @@ module eth_mac_10g_rx_tb;
         rx_rst = 1'b0                                                                                                                                   ;    
     end
 
-    `define TEST4 
+    `define TEST4
 
     `ifdef TEST1
         initial begin
@@ -77,7 +77,8 @@ module eth_mac_10g_rx_tb;
             xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
             xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
+            @(posedge rx_clk)     
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                                        ;
             xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
             #80                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;
@@ -118,7 +119,7 @@ module eth_mac_10g_rx_tb;
             xgmii_rxd = {DATA_WIDTH / 2 {2'b01}}                                                                                                        ;
             #50                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{(DATA_WIDTH / 2) - 8 {2'b10}}, 1'b0}                                                                                          ;                            
+            xgmii_rxd = {{(DATA_WIDTH / 2) - 12 {2'b10}}, {12 {1'b0}}}                                                                                  ;                            
             #10                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;                          
             xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
