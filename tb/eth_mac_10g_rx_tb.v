@@ -16,7 +16,8 @@ module eth_mac_10g_rx_tb;
     parameter TX_USER_WIDTH             = (PTP_TS_ENABLE ? (TX_PTP_TAG_ENABLE ? TX_PTP_TAG_WIDTH : 0) + (TX_PTP_TS_CTRL_IN_TUSER ? 1 : 0) : 0) + 1      ;
     parameter RX_USER_WIDTH             = (PTP_TS_ENABLE ? PTP_TS_WIDTH : 0) + 1                                                                        ;  
     parameter PFC_ENABLE                = 0                                                                                                             ;                                                                           
-    parameter PAUSE_ENABLE              = PFC_ENABLE                                                                                                    ;                                                                                                                 
+    parameter PAUSE_ENABLE              = PFC_ENABLE                                                                                                    ; 
+    parameter ADDRESS_WIDTH             = 48                                                                                                            ;                                                                                                               
 
     //Ports
     reg                                  rx_clk                                                                                                         ;
@@ -34,15 +35,19 @@ module eth_mac_10g_rx_tb;
     reg                                  cfg_rx_enable;
                    
 
-    localparam [7:0]
+    localparam [CTRL_WIDTH - 1 : 0]
         ETH_PRE = 8'h55                                                                                                                                 ,
         ETH_SFD = 8'hD5                                                                                                                                 ;
 
-    localparam [7:0]
+    localparam [CTRL_WIDTH - 1 : 0]
         XGMII_IDLE = 8'h07                                                                                                                              ,
         XGMII_START = 8'hfb                                                                                                                             ,
         XGMII_TERM = 8'hfd                                                                                                                              ,
         XGMII_ERROR = 8'hfe                                                                                                                             ;
+
+    localparam [ADDRESS_WIDTH - 1 : 0]
+        ETH_DST_MAC = 48'hA1A2A3A4A5A6                                                                                                                  ,
+        ETH_SRC_MAC = 48'hA7A8A9AAABAC                                                                                                                  ;  
 
     integer i                                                                                                                                           ;                  
 
@@ -59,26 +64,36 @@ module eth_mac_10g_rx_tb;
         rx_rst = 1'b0                                                                                                                                   ;    
     end
 
-    `define TEST4
+    `define TEST1
 
     `ifdef TEST1
         initial begin
             #100                                                                                                                                        ;               
             @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
             xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
             cfg_rx_enable = 1'b1                                                                                                                        ;
             #10                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH {1'b0}}                                                                                                             ;                            
-            #60                                                                                                                                         ;
+            xgmii_rxd = {{ADDRESS_WIDTH / 3{ETH_SRC_MAC[47:32]}}, {ADDRESS_WIDTH{ETH_DST_MAC}}}                                                             ;
+            #10                                                                                                                                         ;            
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxd = {16'h002E, {ADDRESS_WIDTH* 2/3{ETH_SRC_MAC[31:0]}}}                                                                               ;
+            #10                                                                                                                                         ;        
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxd = {DATA_WIDTH{1'b0}}                                                                                                              ;                                                      
+            #50                                                                                                                                         ;
+            @(posedge rx_clk)                                                                                                                           ;
+            xgmii_rxd = {{DATA_WIDTH/4{XGMII_IDLE}}, {DATA_WIDTH*3/4{1'b0}}}                                                                                ;
+            xgmii_rxc = {{CTRL_WIDTH/4 {1'b1}}, {CTRL_WIDTH*3/4{1'b0}}}                                                                                     ;                       
+            #10                                                                                                                                         ;                                        
             @(posedge rx_clk)                                                                                                                           ;                          
             xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
+            xgmii_rxd = {{DATA_WIDTH*3/8 {XGMII_IDLE}}, XGMII_TERM, 32'h04C11DB7}                                                                                     ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)     
-            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                                        ;
+            @(posedge rx_clk)                                                                                                                           ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
             xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
             #80                                                                                                                                         ;
             @(posedge rx_clk)                                                                                                                           ;
