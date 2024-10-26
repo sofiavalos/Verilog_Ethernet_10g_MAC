@@ -30,9 +30,8 @@ Se realizaron test para comprobar el correcto funcionamiento del procesamiento d
 - En la interfaz AXI se recibió el Preambulo, SFD, bytes de direcciones y tamaño de paquete, los 45 bytes de datos y el checksum.
 - La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
 - No se presentan errores, a pesar de que el tamaño del paquete es más chico que lo estipulado por la norma
+![image](https://github.com/user-attachments/assets/dd5c6675-3650-4917-8cc2-f062ee1a6298)
 ![image](https://github.com/user-attachments/assets/8a3c5c52-d5ea-4da0-a746-677341e2c811)
-
-![image](https://github.com/user-attachments/assets/2ecd9f79-6e79-49aa-888d-823593bdad8c)
 
 ## Test 3
 - Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
