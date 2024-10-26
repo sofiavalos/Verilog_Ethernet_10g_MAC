@@ -131,7 +131,7 @@ Se realizaron test para comprobar el correcto funcionamiento del procesamiento d
 
 - En la interfaz AXI se recibió el Preambulo, SFD, bytes de direcciones y tamaño de paquete, los 46 bytes de datos y el checksum.
 - La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
-- Errores: Flag de `bad frame` y flag de `bad crc`.
+- Errores: Flag de `bad_frame` y flag de `bad_fcs`.
 ![image](https://github.com/user-attachments/assets/51b21825-8e3b-4e43-b862-9684eefb11f5)
 
 ## Posibles conclusiones
