@@ -108,14 +108,14 @@ Se realizaron test para comprobar el correcto funcionamiento del procesamiento d
 
 ## Test 8
 - Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
-- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes con un opcode incorrecto.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes con tamaño de paquete incorrecto.
 - Se enviaron paquetes equivalentes a 46 bytes de datos con el valor "06".
 - Se colocó el checksum correspondiente al final de la carga util de datos.
 - Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
 
 ### Resultados Test 8
 
-- En la interfaz AXI se recibió el Preambulo, SFD, bytes de direcciones y el opcode, los 46 bytes de datos y el checksum.
+- En la interfaz AXI se recibió el Preambulo, SFD, bytes de direcciones y el tamaño del paquete, los 46 bytes de datos y el checksum.
 - La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
 - No hubo errores, mas alla de que el opcode era incorrecto.
 ![image](https://github.com/user-attachments/assets/3149f48a-e579-4d85-ba6e-5ac8243913ad)
@@ -137,7 +137,8 @@ Se realizaron test para comprobar el correcto funcionamiento del procesamiento d
 ## Posibles conclusiones
 - Si el checksum está correcto, el paquete no levanta ninguna flag de error.
 - El módulo no verifica la longitud de paquete que sale por la interfaz AXI si está correctamente armada la estructura.
-- El módulo no verifica src address, dst address ni opcode/lenght.
+- El módulo no verifica src address, dst address ni opcode/lenght(?).
+- Toma todos los datos como CLIENT_DATA e ignora los otros campos(?).
 
 ## Notas
 Calculo de checksum: https://www.crccalc.com/
