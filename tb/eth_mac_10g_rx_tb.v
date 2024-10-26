@@ -7,8 +7,8 @@ module eth_mac_10g_rx_tb;
     parameter ENABLE_PADDING            = 1                                                                                                             ;     
     parameter ENABLE_DIC                = 1                                                                                                             ;                                    
     parameter MIN_FRAME_LENGTH          = 64                                                                                                            ;                                                                         
-    parameter PTP_TS_ENABLE             = 1                                                                                                             ;
-    parameter PTP_TS_FMT_TOD            = 1                                                                                                             ;
+    parameter PTP_TS_ENABLE             = 0                                                                                                             ;
+    parameter PTP_TS_FMT_TOD            = 0                                                                                                             ;
     parameter PTP_TS_WIDTH              = PTP_TS_FMT_TOD ? 96 : 64                                                                                      ;          
     parameter TX_PTP_TS_CTRL_IN_TUSER   = 0                                                                                                             ;                    
     parameter TX_PTP_TAG_ENABLE         = PTP_TS_ENABLE                                                                                                 ;                                
@@ -33,6 +33,7 @@ module eth_mac_10g_rx_tb;
     wire                                 rx_error_bad_frame                                                                                             ;
     wire                                 rx_error_bad_fcs                                                                                               ;
     reg                                  cfg_rx_enable;
+    reg [7                          : 0] cfg_ifg                                                                                                        ;   
                    
 
     localparam [CTRL_WIDTH - 1 : 0]
@@ -49,6 +50,8 @@ module eth_mac_10g_rx_tb;
         ETH_DST_MAC = 48'hA1A2A3A4A5A6                                                                                                                  ,
         ETH_SRC_MAC = 48'hA7A8A9AAABAC                                                                                                                  ;  
 
+    localparam CLIENT_DATA = 8'h06                                                                                                                      ;
+
     integer i                                                                                                                                           ;                  
 
     always #5  rx_clk =~ rx_clk                                                                                                                         ;
@@ -59,115 +62,237 @@ module eth_mac_10g_rx_tb;
         xgmii_rxc                       = {CTRL_WIDTH{1'b0}}                                                                                            ;
         xgmii_rxd                       = {DATA_WIDTH{1'b0}}                                                                                            ;
         cfg_rx_enable                   = 1'b0                                                                                                          ;
-        #100                                                                                                                                            ;       
-        @(posedge rx_clk)                                                                                                                               ;                          
+        cfg_ifg                         = 8'h0c                                                                                                         ;
+        #100                                                                                                                                            ;                              
         rx_rst = 1'b0                                                                                                                                   ;    
     end
 
-    `define TEST1
+    `define TEST9
 
+    // Envia 46 bytes de datos
     `ifdef TEST1
         initial begin
-            #100                                                                                                                                        ;               
-            @(posedge rx_clk)                                                                                                                           ;
+            #100                                                                                                                                        ;
             xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
             xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
             cfg_rx_enable = 1'b1                                                                                                                        ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;  
+            #10                                                                                                                                         ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {{ADDRESS_WIDTH / 3{ETH_SRC_MAC[47:32]}}, {ADDRESS_WIDTH{ETH_DST_MAC}}}                                                             ;
-            #10                                                                                                                                         ;            
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {16'h002E, {ADDRESS_WIDTH* 2/3{ETH_SRC_MAC[31:0]}}}                                                                               ;
-            #10                                                                                                                                         ;        
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {DATA_WIDTH{1'b0}}                                                                                                              ;                                                      
-            #50                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH/4{XGMII_IDLE}}, {DATA_WIDTH*3/4{1'b0}}}                                                                                ;
-            xgmii_rxc = {{CTRL_WIDTH/4 {1'b1}}, {CTRL_WIDTH*3/4{1'b0}}}                                                                                     ;                       
-            #10                                                                                                                                         ;                                        
-            @(posedge rx_clk)                                                                                                                           ;                          
-            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH*3/8 {XGMII_IDLE}}, XGMII_TERM, 32'h04C11DB7}                                                                                     ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;                              
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h2E00, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;  
+            xgmii_rxd = {8{CLIENT_DATA}}                                                                                                                ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #50                                                                                                                                         ;                              
+            xgmii_rxd = {32'h7E2C4E1E,{4{CLIENT_DATA}}}                                                                                                 ;      
+            #10                                                                                                                                         ;                              
             xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
+            xgmii_rxd = {{28{XGMII_IDLE}},XGMII_TERM}                                                                                                   ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
             #80                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
             $finish                                                                                                                                     ; 
         end
+    // Envia 45 bytes de datos
     `elsif TEST2
         initial begin
-            #100                                                                                                                                        ;               
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
             xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
             cfg_rx_enable = 1'b1                                                                                                                        ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;  
+            #10                                                                                                                                         ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH {1'b0}}                                                                                                             ;
-            #1870                                                                                                                                       ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h2D00, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {8{CLIENT_DATA}}                                                                                                                ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #50                                                                                                                                         ;                              
+            xgmii_rxd = {XGMII_TERM, 32'h12027F98, {3{CLIENT_DATA}}}                                                                                    ;                                                                                               
+            xgmii_rxc = {1'b1,{7{1'b0}}}                                                                                                                ;            
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
             #80                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
             $finish                                                                                                                                     ;       
         end
+    // Envia 45 bytes de datos + padding
     `elsif TEST3
         initial begin
-            #100                                                                                                                                        ;               
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
             xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
             cfg_rx_enable = 1'b1                                                                                                                        ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;  
+            #10                                                                                                                                         ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH / 2 {2'b01}}                                                                                                        ;
-            #50                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{(DATA_WIDTH / 2) - 12 {2'b10}}, {12 {1'b0}}}                                                                                  ;                            
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;                          
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h2D00, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {DATA_WIDTH/8{8'h06}}                                                                                                           ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #50                                                                                                                                         ;                              
+            xgmii_rxd = {32'h2CC4F684, 8'h00, {3{CLIENT_DATA}}}                                                                                         ;      
+            #10                                                                                                                                         ;                              
             xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
+            xgmii_rxd = {{28{XGMII_IDLE}}, XGMII_TERM}                                                                                                  ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
             #80                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            $finish                                                                                                                                     ;
+            $finish                                                                                                                                     ; 
         end
+    // Envia 10 bytes de datos
     `elsif TEST4
         initial begin
-            #100                                                                                                                                        ;               
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_START}                                                                                    ;
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
             xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
             cfg_rx_enable = 1'b1                                                                                                                        ;
-            #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;  
+            #10                                                                                                                                         ;  
             xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
-            xgmii_rxd = {DATA_WIDTH/2 {2'b10}}                                                                                                          ;
-            #1880                                                                                                                                       ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
-            xgmii_rxd = {{DATA_WIDTH - 1 {XGMII_IDLE}}, XGMII_TERM}                                                                                     ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
             #10                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
-            xgmii_rxd = {DATA_WIDTH {XGMII_IDLE}}                                                                                                       ;      
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h0A00, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}}                                                                                                              ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #10                                                                                                                                         ;                              
+            xgmii_rxd = {{12{XGMII_IDLE}}, XGMII_TERM, 32'hF52BFFBD}                                                                                    ;                                                                                               
+            xgmii_rxc = {{CTRL_WIDTH/2{1'b1}},{CTRL_WIDTH/2{1'b0}}}                                                                                     ;            
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
             #80                                                                                                                                         ;
-            @(posedge rx_clk)                                                                                                                           ;
             $finish                                                                                                                                     ;       
         end
+    // Envia 1500 bytes de datos
+    `elsif TEST6
+        initial begin
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'hDC05, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}}                                                                                                              ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #1870                                                                                                                                       ;                              
+            xgmii_rxd = {XGMII_IDLE , XGMII_TERM, 32'h620F6DE6, {2{CLIENT_DATA}}}                                                                       ;                                                                                               
+            xgmii_rxc = {2'b11,{6{1'b0}}}                                                                                                               ; 
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
+            #80                                                                                                                                         ;
+            $finish                                                                                                                                     ;       
+        end
+    // Envia 1501 bytes de datos
+    `elsif TEST6
+        initial begin
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'hDD05, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}};                                                                                                             ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #1870                                                                                                                                       ;                              
+            xgmii_rxd = {XGMII_TERM, 32'h244D71BF, {3{CLIENT_DATA}}}                                                                                    ;                                                                                               
+            xgmii_rxc = {1'b1,{7{1'b0}}}                                                                                                                ; 
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
+            #80                                                                                                                                         ;
+            $finish                                                                                                                                     ;       
+        end
+    // Envia 2997 bytes de datos
+    `elsif TEST7
+        initial begin
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'hB50B, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}}                                                                                                              ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #3740                                                                                                                                       ;                              
+            xgmii_rxd = {XGMII_TERM, 32'h6DC5FB6E, {3{CLIENT_DATA}}}                                                                                    ;                                                                                                         
+            xgmii_rxc = {1'b1,{7{1'b0}}}                                                                                                                ;       
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
+            #80                                                                                                                                         ;
+            $finish                                                                                                                                     ;       
+        end
+    // Envia opcode diferente
+    `elsif TEST8
+        initial begin
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h0100, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}}                                                                                                              ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #50                                                                                                                                         ;                              
+            xgmii_rxd = {32'h04537DE4, {4{CLIENT_DATA}}}                                                                                                ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {{28{XGMII_IDLE}}, XGMII_TERM}                                                                                                  ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
+            #80                                                                                                                                         ;
+            $finish                                                                                                                                     ; 
+        end
+    // envia checksum incorrecto
+    `elsif TEST9
+        initial begin
+            #100                                                                                                                                        ;
+            xgmii_rxd = {ETH_SFD, {6{ETH_PRE}}, XGMII_START}                                                                                            ;
+            xgmii_rxc = {{CTRL_WIDTH - 1 {1'b0}}, 1'b1}                                                                                                 ;         
+            cfg_rx_enable = 1'b1                                                                                                                        ;
+            #10                                                                                                                                         ;  
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;
+            xgmii_rxd = {ETH_SRC_MAC[47:32], ETH_DST_MAC}                                                                                               ;
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{2{CLIENT_DATA}}, 16'h2E00, ETH_SRC_MAC[31:0]}                                                                                 ;                            
+            #10                                                                                                                                         ;
+            xgmii_rxd = {{8{CLIENT_DATA}}}                                                                                                              ;
+            xgmii_rxc = {CTRL_WIDTH {1'b0}}                                                                                                             ;                       
+            #50                                                                                                                                         ;                              
+            xgmii_rxd = {32'hCBF43926, {4{CLIENT_DATA}}}                                                                                                ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {{28{XGMII_IDLE}}, XGMII_TERM}                                                                                                  ;      
+            #10                                                                                                                                         ;                              
+            xgmii_rxc = {CTRL_WIDTH {1'b1}}                                                                                                             ;
+            xgmii_rxd = {32{XGMII_IDLE}}                                                                                                                ; 
+            #80                                                                                                                                         ;
+            $finish                                                                                                                                     ; 
+        end    
     `endif	
 
     eth_mac_10g 
