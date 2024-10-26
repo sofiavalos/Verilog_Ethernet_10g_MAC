@@ -4,59 +4,91 @@
 
 Se realizaron test para comprobar el correcto funcionamiento del procesamiento de datos por parte del receptor. Estos se encuentran en el archivo [test RX](eth_mac_10g_rx_tb.v).
 
-Los objetivos generales son
-
-| Número de Test | Descripción del Test                                                                 | Resultado Esperado                                    | Resultado obtenido      |
-|----------------|--------------------------------------------------------------------------------------|------------------------------------------------------|----------------|
-| 1              | Frame Ethernet (paquete sin Preambulo y SFD) de dimensión mínima de 64 bytes con 46 bytes de data todos 0s  | Datos en AXI por 46 bytes con todos 0s.               | TEST OK        |
-| 2              | Frame Ethernet (paquete sin Preambulo y SFD) de dimensión mínima de 1518 bytes con 1500 bytes de data todos 0s | Datos en AXI por 1500 bytes con todos 0s.             | TEST OK        |
-| 3              | Frame Ethernet (paquete sin Preambulo y SFD) de dimensión mínima de 64 bytes con data 45 bytes en 0s + 1 byte de padding | Datos en AXI por 45 bytes con todos 0s.               | TEST OK        |
-| 4              | Frame Ethernet (paquete sin Preambulo y SFD) de dimensión mínima de 1519 bytes con data 1501 bytes en 0s | Datos en AXI. | TEST OK        |
-
 ## Test 1
-- Se envio un paquete IDLE con el caracter de inicio de paquete al final del mismo.
-- Se enviaron paquetes equivalentes a 46 bytes de datos con todos 0s.
-- Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 46 bytes de datos con el valor "06".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
 
 ### Resultados Test 1
 
-- En la interfaz AXI se recibieron los 46 bytes.
-- Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
-
-![Test1](<img/Waveform-TEST1.png>)
+- En la interfaz AXI se recibió el Preambulo, SFD, los bytes 46 datos y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- No se detectaron errores.
+![image](https://github.com/user-attachments/assets/f9f64696-c672-46ca-8768-3ebe33b10fc1)
 
 ## Test 2
-- Se envio un paquete IDLE con el caracter de inicio de paquete al final del mismo.
-- Se enviaron paquetes equivalentes a 1500 bytes de datos con todos 0s.
-- Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 45 bytes de datos con el valor "06".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
 
 ### Resultados Test 2
 
-- En la interfaz AXI se recibieron los 1500 bytes, sin errores.
-- Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
+- En la interfaz AXI se recibió el Preambulo, SFD, los 45 bytes de datos y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- No se presentan errores, a pesar de que el tamaño del paquete es más chico que lo estipulado por la norma
+![image](https://github.com/user-attachments/assets/8a3c5c52-d5ea-4da0-a746-677341e2c811)
 
-![Test2](<img/Waveform-TEST2.png>)
+![image](https://github.com/user-attachments/assets/2ecd9f79-6e79-49aa-888d-823593bdad8c)
 
 ## Test 3
-- Se envio un paquete IDLE con el caracter de inicio de paquete al final del mismo.
-- Se enviaron paquetes equivalentes a 45 bytes de datos igual a 10 y un byte de padding, es decir 0.
-- Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 45 bytes de datos con el valor "06" + 1 byte de padding, es decir, "00".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
 
 ### Resultados Test 3
 
-- En la interfaz AXI se recibieron los 45 bytes más el bit de padding. No hubo errores
-- Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
+- En la interfaz AXI se recibió el Preambulo, SFD, los 45 bytes de datos, el byte de padding y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- No hubo errores.
+![image](https://github.com/user-attachments/assets/f3c3a1d1-b966-4649-baf3-cf86ca24033c)
 
-![Test3](<img/Waveform-TEST3.png>)
 
 ## Test 4
-- Se envio un paquete IDLE con el caracter de inicio de paquete al final del mismo.
-- Se enviaron paquetes equivalentes a 1501 bytes de datos con todos 0s.
-- Al finalizar se envio el delimitador de final de paquete junto con datos IDLE.
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 10 bytes de datos con el valor "06".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
 
 ### Resultados Test 4
 
-- En la interfaz AXI se recibieron los 1501 bytes, incluso cuando esto significa que supera la máxima longitud defida por la norma.
-- Las señales indicadoras de inicio y final de paquete se activaron en el momento correspondiente.
+- En la interfaz AXI se recibió el Preambulo, SFD, los 10 bytes de datos y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- Aunque el tamaño del paquete es considerablemente más chico que lo que indica la norma, no hubo errores.
+![image](https://github.com/user-attachments/assets/593f015d-c021-4e67-926f-cbe7b27b902d)
 
-![Test4](<img/Waveform-TEST4.png>)
+
+## Test 5
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 1500 bytes de datos con el valor "06".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
+
+### Resultados Test 5
+
+- En la interfaz AXI se recibió el Preambulo, SFD, los 1500 bytes de datos y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- Como era esperado, no se presentaron errores.
+![image](https://github.com/user-attachments/assets/650ebac2-8e77-4c81-9161-5c3971764ec7)
+
+## Test 6
+- Se envio un paquete con caracter XGMII de inicio, Preambulo y SFD.
+- Se enviaron 6 bytes de dirección de destino, otros 6 de dirección de fuente, y 2 bytes de tamaño de paquete.
+- Se enviaron paquetes equivalentes a 1501 bytes de datos con el valor "06".
+- Se colocó el checksum correspondiente al final de la carga util de datos.
+- Al finalizar se envió el delimitador de final de paquete XGMII, y luego datos IDLE.
+
+### Resultados Test 6
+
+- En la interfaz AXI se recibió el Preambulo, SFD, los 1501 bytes de datos y el checksum.
+- La interfaz AXI solo corta los caracteres XGMII reemplazandolos por "00".
+- No se presentaron errores.
+
+
