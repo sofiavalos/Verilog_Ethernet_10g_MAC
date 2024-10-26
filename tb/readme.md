@@ -2,7 +2,7 @@
 
 ## Test sobre el receptor
 
-Se realizaron test para comprobar el correcto funcionamiento del procesamiento de datos por parte del receptor. Estos se encuentran en el archivo [test RX](eth_mac_10g_tb.v).
+Se realizaron test para comprobar el correcto funcionamiento del procesamiento de datos por parte del receptor. Estos se encuentran en el archivo [test RX](eth_mac_10g_rx_tb.v).
 
 Los objetivos generales son
 
