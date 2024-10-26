@@ -138,7 +138,7 @@ Se realizaron test para comprobar el correcto funcionamiento del procesamiento d
 - Si el checksum está correcto, el paquete no levanta ninguna flag de error.
 - El módulo no verifica la longitud de paquete que sale por la interfaz AXI si está correctamente armada la estructura.
 - El módulo no verifica src address, dst address ni opcode/lenght(?).
-- Toma todos los datos como CLIENT_DATA e ignora los otros campos(?).
+- Toma todos los datos como CLIENT DATA e ignora los otros campos(?).
 
 ## Notas
 Calculo de checksum: https://www.crccalc.com/
